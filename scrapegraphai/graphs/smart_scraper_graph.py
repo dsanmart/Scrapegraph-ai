@@ -75,7 +75,8 @@ class SmartScraperGraph(AbstractGraph):
             output=["parsed_doc"],
             node_config={
                 "llm_model": self.llm_model,
-                "chunk_size": self.model_token
+                "chunk_size": self.model_token,
+                "parser_kwargs": self.config.get("parser_kwargs", {}),
             }
         )
 

@@ -46,6 +46,15 @@ class ParseNode(BaseNode):
         self.parse_urls = (
             False if node_config is None else node_config.get("parse_urls", False)
         )
+        self.parser_kwargs = (
+            {} if node_config is None else node_config.get("parser_kwargs", {})
+        )
+        self.ignore_images = (
+            True if "ignore_images" not in self.parser_kwargs.keys() else self.parser_kwargs.get("ignore_images", True)
+        )
+        self.ignore_links = (
+            False if "ignore_links" not in self.parser_kwargs.keys() else self.parser_kwargs.get("ignore_links", False)
+        )
 
         self.llm_model = node_config.get("llm_model")
         self.chunk_size = node_config.get("chunk_size")
@@ -75,7 +84,7 @@ class ParseNode(BaseNode):
         source = input_data[1] if self.parse_urls else None
 
         if self.parse_html:
-            docs_transformed = Html2TextTransformer(ignore_links=False).transform_documents(input_data[0])
+            docs_transformed = Html2TextTransformer(ignore_links=self.ignore_links, ignore_images=self.ignore_images).transform_documents(input_data[0])
             docs_transformed = docs_transformed[0]
 
             link_urls, img_urls = self._extract_urls(docs_transformed.page_content, source)
