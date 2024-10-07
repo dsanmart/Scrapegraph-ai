@@ -268,10 +268,6 @@ class FetchNode(BaseNode):
                     f"Failed to retrieve contents from the webpage at url: {source}"
                 )
         else:
-            loader_kwargs = {}
-
-            if self.node_config is not None:
-                loader_kwargs = self.node_config.get("loader_kwargs", {})
 
             if self.browser_base is not None:
                 try:
@@ -301,7 +297,13 @@ class FetchNode(BaseNode):
                 document = [Document(page_content=data,
                                     metadata={"source": source})]
             else:
-                loader = ChromiumLoader([source], headless=self.headless, **loader_kwargs)
+                if self.loader_kwargs.get("browser_cookies") is not None:
+                    browser_cookies = self.loader_kwargs.get("browser_cookies")
+                    # Remove the browser_cookies key from the loader_kwargs
+                    self.loader_kwargs.pop("browser_cookies")
+                else:
+                    browser_cookies = None
+                loader = ChromiumLoader([source], headless=self.headless, browser_cookies=browser_cookies, **self.loader_kwargs)
                 document = loader.load()
 
             if not document or not document[0].page_content.strip():

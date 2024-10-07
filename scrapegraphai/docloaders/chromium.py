@@ -32,6 +32,7 @@ class ChromiumLoader(BaseLoader):
         backend: str = "playwright",
         headless: bool = True,
         proxy: Optional[Proxy] = None,
+        browser_cookies: Optional[List[dict]] = None,
         load_state: str = "domcontentloaded",
         **kwargs: Any,
     ):
@@ -59,6 +60,7 @@ class ChromiumLoader(BaseLoader):
         self.headless = headless
         self.proxy = parse_or_search_proxy(proxy) if proxy else None
         self.urls = urls
+        self.browser_cookies = browser_cookies
         self.load_state = load_state
 
     async def ascrape_playwright(self, url: str) -> str:
@@ -83,6 +85,10 @@ class ChromiumLoader(BaseLoader):
             )
             try:
                 context = await browser.new_context()
+                
+                if self.browser_cookies:
+                    await context.add_cookies(self.browser_cookies)
+
                 await Malenia.apply_stealth(context)
                 page = await context.new_page()
                 await page.goto(url, wait_until="domcontentloaded")
