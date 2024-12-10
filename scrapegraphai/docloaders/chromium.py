@@ -96,7 +96,12 @@ class ChromiumLoader(BaseLoader):
                 results = await page.content()  # Simply get the HTML content
                 logger.info("Content scraped")
             except Exception as e:
-                results = f"Error: {e}"
+                logger.warning(f"Scrapping error: {e}")
+                try:
+                    logger.warning(f"Trying to read content anyway...")
+                    results = await page.content()  # Simply get the HTML content
+                except Exception as e:
+                    logger.error(f"Failed to read content: {e}")
             await browser.close()
         return results
 
